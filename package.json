@@ -1,0 +1,19 @@
+{
+  "name": "glossary",
+  "version": "1.0.0",
+  "description": "This application can store and display a list of words and description.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Hemanta29/glossary.git"
+  },
+  "author": "Hemanta",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Hemanta29/glossary/issues"
+  },
+  "homepage": "https://github.com/Hemanta29/glossary#readme"
+}
