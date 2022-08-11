@@ -9,7 +9,7 @@ const GlossarySchema = new Schema({
 	},
 	definition: {
 		type: String,
-		required: [true, 'Definiton is required.'],
+		required: [true, 'Definition is required.'],
 	},
 });
 

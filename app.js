@@ -1,7 +1,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const cors = require('cors');
 
-const router = require('./routes/routes.js');
+const router = require('./routes/glossary.route');
 
 const app = express();
 
@@ -22,7 +23,7 @@ app.use(
 // app.use(bodyParser.urlencoded({
 //   extended: true
 // }));
-
+app.use(cors());
 router(app);
 
 mongoose.Promise = global.Promise;
@@ -52,7 +53,10 @@ process.on('SIGINT', () => {
 });
 
 app.use((err, req, res, next) => {
-	res.status(422).send({ error: err.message });
+	res.status(422).send({
+		status: false,
+		error: err.message,
+	});
 });
 
 module.exports = app;
