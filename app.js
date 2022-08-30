@@ -1,10 +1,19 @@
 const express = require('express');
-const mongoose = require('mongoose');
+const compression = require('compression');
 const cors = require('cors');
+const dotenv = require('dotenv');
 
-const router = require('./routes/glossary.route');
+const { dbConnect } = require("./config/dbConnect.js")
+
+const { errorHandler, notFound } = require('./middleware/errorHandling');
+const glossaryRoutes = require('./routes/glossary.route');
+const userRoutes = require('./routes/user.route');
+
+dotenv.config();
+dbConnect();
 
 const app = express();
+app.use(cors());
 
 // Express v4.16.0 and higher
 // --------------------------
@@ -23,40 +32,16 @@ app.use(
 // app.use(bodyParser.urlencoded({
 //   extended: true
 // }));
-app.use(cors());
-router(app);
+glossaryRoutes(app);
+userRoutes(app);
 
-mongoose.Promise = global.Promise;
-mongoose.connect('mongodb://localhost/glossaryManagement');
-mongoose.connection.on('connected', () => {
-	console.log(
-		'Mongoose default connection open to ' +
-			'mongodb://localhost/glossaryManagement'
-	);
-});
-// If the connection throws an error
-mongoose.connection.on('error', (err) => {
-	console.log(`Mongoose default connection error: ${err}`);
-});
-// When the connection is disconnected
-mongoose.connection.on('disconnected', () => {
-	console.log('Mongoose default connection disconnected');
-});
-// If the Node process ends, close the Mongoose connection
-process.on('SIGINT', () => {
-	mongoose.connection.close(() => {
-		console.log(
-			'Mongoose default connection disconnected through app termination'
-		);
-		process.exit(0);
-	});
-});
+app.use(express.static(`${__dirname}/dist/glossary-ui`));
 
-app.use((err, req, res, next) => {
-	res.status(422).send({
-		status: false,
-		error: err.message,
-	});
-});
+// compress all responses
+app.use(compression());
+
+//error middleware
+app.use(notFound);
+app.use(errorHandler);
 
 module.exports = app;
