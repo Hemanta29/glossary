@@ -6,6 +6,7 @@ const dotenv = require('dotenv');
 const { dbConnect } = require("./config/dbConnect.js")
 
 const { errorHandler, notFound } = require('./middleware/errorHandling');
+const { requestedMethods } = require('./middleware/requestedMethods');
 const glossaryRoutes = require('./routes/glossary.route');
 const userRoutes = require('./routes/user.route');
 
@@ -40,6 +41,7 @@ app.use(express.static(`${__dirname}/dist/glossary-ui`));
 // compress all responses
 app.use(compression());
 
+app.use(requestedMethods);
 //error middleware
 app.use(notFound);
 app.use(errorHandler);

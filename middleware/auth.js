@@ -9,11 +9,12 @@ const authGuard = async (req, res, next) => {
     ) {
         try {
             token = req.headers.authorization.split(' ')[1];
-            const decoded = jwt.verify(token, process.env.EMAIL_SECRET);
-            req.user = await User.findById(decoded.id).select('-password');
+            const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+            req.user = await User.findById(decoded.id).select('-pwd');
             next();
         } catch (error) {
-            res.status(401).send('Not authorized! Token failed.');
+            console.log(error);
+            res.status(401).send('Not authorized! Token may be expired or failed.');
         }
     }
     else if (!token) {

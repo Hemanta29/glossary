@@ -10,8 +10,8 @@ const {
 module.exports = (app) => {
     app.post('/api/register', async (req, res, next) => {
         try {
-            const { email, password } = req.body;
-            const response = await userRegister(email, password);
+            const { email, pwd } = req.body;
+            const response = await userRegister(email, pwd);
             res.send({
                 status: true,
                 response,
@@ -22,8 +22,8 @@ module.exports = (app) => {
     });
     app.post('/api/login', async (req, res, next) => {
         try {
-            const { email, password } = req.body;
-            const response = await userLogin(email, password);
+            const { email, pwd } = req.body;
+            const response = await userLogin(email, pwd, res);
             res.send(response);
         } catch (err) {
             next(err);

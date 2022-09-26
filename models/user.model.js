@@ -10,7 +10,7 @@ const UserSchema = new Schema(
             required: true,
             unique: true,
         },
-        password: {
+        pwd: {
             type: String,
             required: true,
         },
@@ -25,16 +25,16 @@ const UserSchema = new Schema(
 );
 
 UserSchema.methods.matchPassword = async function (enteredPassword) {
-    return await bcrypt.compare(enteredPassword, this.password);
+    return await bcrypt.compare(enteredPassword, this.pwd);
 };
 
 UserSchema.pre('save', async function (next) {
-    console.log("Modified password" + this.isModified('password'));
-    if (!this.isModified('password')) {
+    console.log("Modified pwd" + this.isModified('pwd'));
+    if (!this.isModified('pwd')) {
         next();
     }
     const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
+    this.pwd = await bcrypt.hash(this.pwd, salt);
 });
 
 const User = mongoose.model('User', UserSchema);

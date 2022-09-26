@@ -4,16 +4,16 @@ const nodemailer = require("nodemailer");
 const jwt = require("jsonwebtoken");
 const bcrypt = require('bcryptjs')
 const User = require('../models/user.model');
-const { generateToken } = require('../helper/generateToken');
+const { generateToken, refreshToken } = require('../helper/generateToken');
 
-const userRegister = async (email, password) => {
-    console.log(email, password)
+const userRegister = async (email, pwd) => {
+    console.log(email, pwd)
     const valid_email = emailValidator.validate(email);
     console.log(valid_email);
     if (valid_email) {
         const user = await User.create({
             email,
-            password,
+            pwd,
         });
         console.log(user);
         if (user) {
@@ -26,7 +26,7 @@ const userRegister = async (email, password) => {
                 },
             });
 
-            const token = jwt.sign({ id: user._id }, process.env.EMAIL_SECRET, {
+            const token = jwt.sign({ id: user._id }, process.env.ACCESS_TOKEN_SECRET, {
                 expiresIn: '1d',
             });
             const url = `http://localhost:${process.env.PORT}/api/users/verification/${token}`;       //localhost
@@ -81,18 +81,21 @@ const userEmailVerify = async (token, emailSecret) => {
     }
 }
 
-const userLogin = async (email, password) => {
+const userLogin = async (email, pwd, res) => {
     const user = await User.findOne({ email: email });
-    if (user && (await user.matchPassword(password))) {
+    if (user && (await user.matchPassword(pwd))) {
         if (user.confirmed) {
             return {
                 email: user.email,
-                token: generateToken(user._id),
+                access_token: generateToken(user._id),
+                refresh_token: refreshToken(user._id),
             };
         } else {
+            res.status(403);
             throw new Error('Please check you email and verify yourself!');
         }
     } else {
+        res.status(404);
         throw new Error('Invalid Email or Password!');
     }
 }
@@ -109,7 +112,7 @@ const getResetPasswordLink = async (email) => {
             },
         });
 
-        const token = await jwt.sign({ id: user._id }, process.env.EMAIL_SECRET, {
+        const token = await jwt.sign({ id: user._id }, process.env.ACCESS_TOKEN_SECRET, {
             expiresIn: '30min',
         });
 
@@ -120,7 +123,7 @@ const getResetPasswordLink = async (email) => {
             from: process.env.EMAIL,
             to: email,
             subject: 'Reset Password',
-            text: 'Reset your password for Glossary app.',
+            text: 'Reset your pwd for Glossary app.',
             html: `<p>Please click this link to reset password. <a href="${url}">${url}</a></p>`,
         });
         if (emailSent) {
@@ -137,13 +140,13 @@ const getResetPasswordLink = async (email) => {
 }
 
 const resetPassword = async (token, newPass, oldPass) => {
-    const { id } = jwt.verify(token, process.env.EMAIL_SECRET);
+    const { id } = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
     if (id) {
         if (newPass !== oldPass) {
             const salt = await bcrypt.genSalt(10);
             newPass = await bcrypt.hash(newPass, salt);
             const updatedUser = await User.findByIdAndUpdate(id, {
-                password: newPass,
+                pwd: newPass,
             });
             updatedUser.save();
             if (updatedUser) {
