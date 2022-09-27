@@ -32,9 +32,10 @@ module.exports = (app) => {
     app.get('/api/users/verification/:token', async (req, res, next) => {
         try {
             const token = req.params.token;
-            const emailSecret = process.env.EMAIL_SECRET;
+            const emailSecret = process.env.ACCESS_TOKEN_SECRET;
+            console.log(token, emailSecret)
             await userEmailVerify(token, emailSecret);
-            res.redirect(`http://localhost:${process.env.PORT}/api/login`);
+            res.redirect(`${process.env.HOST}:${process.env.PORT}/api/login`);
         } catch (err) {
             next(err);
         }
